@@ -1,0 +1,135 @@
+<script>
+const BAHT_TO_GRAM = 15.244;
+let currentGoldPrice = 0;
+
+async function fetchGoldPrice() {
+  try {
+    // ใช้ proxy ที่เสถียรกว่า
+    const response = await fetch(
+      "https://api.allorigins.win/get?url=" +
+      encodeURIComponent("https://www.goldtraders.or.th/api/getprices")
+    );
+
+    const proxyData = await response.json();
+    const data = JSON.parse(proxyData.contents);
+
+    currentGoldPrice = parseFloat(data.response.price);
+
+    if (!currentGoldPrice) throw "no price";
+
+    document.getElementById("goldPriceDisplay").innerHTML =
+      "ราคาทองวันนี้: " + currentGoldPrice.toLocaleString() + " บาท";
+
+  } catch (error) {
+    document.getElementById("goldPriceDisplay").innerHTML =
+      `โหลดอัตโนมัติไม่สำเร็จ 
+      <br><br>
+      <input type="number" id="manualPrice" placeholder="กรอกราคาทองเอง">
+      <button onclick="setManualPrice()">ยืนยันราคา</button>`;
+  }
+
+  updateSummary(1);
+  updateSummary(2);
+}
+
+function setManualPrice(){
+  const manual = parseFloat(document.getElementById("manualPrice").value);
+  if(!manual) return alert("กรอกราคาให้ถูกต้อง");
+
+  currentGoldPrice = manual;
+  document.getElementById("goldPriceDisplay").innerHTML =
+    "ราคาทองปัจจุบัน: " + currentGoldPrice.toLocaleString() + " บาท";
+
+  updateSummary(1);
+  updateSummary(2);
+}
+
+function switchTab(n){
+  document.getElementById("person1").classList.add("hidden");
+  document.getElementById("person2").classList.add("hidden");
+  document.getElementById("person"+n).classList.remove("hidden");
+}
+
+function init(person){
+  const container = document.getElementById("person"+person);
+
+  container.innerHTML = `
+  <label>ชื่อเจ้าของพอร์ต</label>
+  <input id="name${person}" placeholder="เช่น หงษ์อี้">
+
+  <label>ตั้งเป้า (บาททอง)</label>
+  <input type="number" id="goal${person}" placeholder="เช่น 1">
+
+  <h3>บันทึกการซื้อ</h3>
+  <label>ราคาที่ซื้อ (บาท/บาททอง)</label>
+  <input type="number" id="buyPrice${person}">
+
+  <label>จำนวนเงินที่ซื้อ (บาท)</label>
+  <input type="number" id="amount${person}">
+
+  <button onclick="addRecord(${person})">บันทึก</button>
+
+  <div id="summary${person}" class="card"></div>
+  `;
+
+  updateSummary(person);
+}
+
+function addRecord(person){
+  const buyPrice = parseFloat(document.getElementById("buyPrice"+person).value);
+  const amount = parseFloat(document.getElementById("amount"+person).value);
+
+  if(!buyPrice || !amount) return alert("กรอกข้อมูลให้ครบ");
+
+  const bahtGold = amount / buyPrice;
+  const gramGold = bahtGold * BAHT_TO_GRAM;
+
+  let data = JSON.parse(localStorage.getItem("gold"+person)) || [];
+  data.push({buyPrice, amount, bahtGold, gramGold});
+  localStorage.setItem("gold"+person, JSON.stringify(data));
+
+  updateSummary(person);
+}
+
+function updateSummary(person){
+  let data = JSON.parse(localStorage.getItem("gold"+person)) || [];
+  let totalMoney = 0;
+  let totalBaht = 0;
+  let totalGram = 0;
+
+  data.forEach(d=>{
+    totalMoney += d.amount;
+    totalBaht += d.bahtGold;
+    totalGram += d.gramGold;
+  });
+
+  const name = document.getElementById("name"+person)?.value || "ยังไม่ได้ตั้งชื่อ";
+  const goal = parseFloat(document.getElementById("goal"+person)?.value) || 0;
+
+  const currentValue = totalBaht * currentGoldPrice;
+  const profit = currentValue - totalMoney;
+
+  let progressPercent = goal > 0 ? (totalBaht/goal)*100 : 0;
+  if(progressPercent > 100) progressPercent = 100;
+
+  document.getElementById("summary"+person).innerHTML = `
+  <b>พอร์ตของ: ${name}</b><br><br>
+  เงินสะสม: ${totalMoney.toFixed(2)} บาท<br>
+  ทองสะสม: ${totalBaht.toFixed(4)} บาททอง<br>
+  เทียบเป็นกรัม: ${totalGram.toFixed(4)} กรัม<br><br>
+
+  มูลค่าปัจจุบัน: ${currentValue.toFixed(2)} บาท<br>
+  กำไร/ขาดทุน: ${profit.toFixed(2)} บาท<br><br>
+
+  เป้าหมาย: ${goal} บาททอง<br>
+  สำเร็จ: ${progressPercent.toFixed(2)}%
+  <div class="progress">
+    <div class="progress-bar" style="width:${progressPercent}%"></div>
+  </div>
+  `;
+}
+
+init(1);
+init(2);
+fetchGoldPrice();
+</script>
