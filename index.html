@@ -3,132 +3,152 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gold Together - บันทึกออมทองของเรา</title>
+    <title>Gold Tracker - หงษ์อี้ & เพชร</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Kanit', sans-serif; background-color: #fcfcfc; }
-        .tab-active { background-color: #facc15; color: white; transform: scale(1.05); shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
-        .gold-gradient { background: linear-gradient(135deg, #fde047 0%, #ca8a04 100%); }
+        body { font-family: 'Kanit', sans-serif; background-color: #fafafa; }
+        .port-active { background-color: #fbbf24; color: white; box-shadow: 0 10px 15px -3px rgba(251, 191, 36, 0.4); }
+        .gold-gradient { background: linear-gradient(135deg, #f59e0b 0%, #92400e 100%); }
+        .glass-card { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(10px); }
     </style>
 </head>
-<body class="p-4 md:p-6">
+<body class="p-4 md:p-8">
 
     <div class="max-w-4xl mx-auto">
-        <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4 bg-white p-6 rounded-3xl shadow-sm border border-yellow-50">
-            <div class="text-center md:text-left">
-                <h1 class="text-2xl font-bold text-gray-800">✨ Gold Together</h1>
-                <p class="text-gray-400 text-sm">รวมพลังออมทอง สร้างอนาคต</p>
+        <div class="bg-white p-6 rounded-[2rem] shadow-xl border-b-4 border-yellow-500 mb-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div>
+                <h1 class="text-3xl font-black text-gray-800 tracking-tight">GOLD TRACKER</h1>
+                <p class="text-gray-400">บันทึกพอร์ตทองคำของ <span class="text-yellow-600 font-bold">หงษ์อี้ & เพชร</span></p>
             </div>
-            <div class="bg-yellow-50 p-3 rounded-2xl text-center min-w-[150px]">
-                <p class="text-[10px] font-bold text-yellow-600 uppercase tracking-widest">ราคาทองโลก/ไทย</p>
-                <p id="livePriceDisplay" class="text-2xl font-black text-yellow-700">฿42,500</p>
-            </div>
-        </div>
-
-        <div class="bg-gray-800 text-white p-4 rounded-2xl mb-6 flex justify-around items-center shadow-inner">
-            <div class="text-center border-r border-gray-600 flex-1">
-                <p class="text-[10px] opacity-60">น้ำหนักรวม 2 พอร์ต</p>
-                <p id="grandWeight" class="text-lg font-bold text-yellow-400">0.00 กรัม</p>
-            </div>
-            <div class="text-center flex-1">
-                <p class="text-[10px] opacity-60">มูลค่ารวมปัจจุบัน</p>
-                <p id="grandValue" class="text-lg font-bold text-green-400">฿0</p>
+            <div class="text-center md:text-right bg-yellow-50 px-6 py-3 rounded-2xl border border-yellow-100">
+                <div class="flex items-center justify-center md:justify-end gap-2 text-yellow-600 font-bold text-xs mb-1">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-yellow-500"></span>
+                    </span>
+                    ราคาสมาคมวันนี้
+                </div>
+                <p id="livePriceDisplay" class="text-3xl font-black text-gray-800">กำลังโหลด...</p>
+                <p id="priceTime" class="text-[10px] text-gray-400">กำลังอัปเดตข้อมูล...</p>
             </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-2 mb-6 p-1 bg-gray-100 rounded-2xl">
-            <button onclick="switchPort('mine')" id="tab-mine" class="py-3 rounded-xl font-bold transition-all duration-300">พอร์ตที่ 1</button>
-            <button onclick="switchPort('partner')" id="tab-partner" class="py-3 rounded-xl font-bold transition-all duration-300 text-gray-400">พอร์ตที่ 2</button>
+        <div class="flex gap-4 mb-8 bg-gray-200/50 p-2 rounded-2xl">
+            <button onclick="switchPort('mine')" id="tab-mine" class="flex-1 py-4 rounded-xl font-bold transition-all duration-500">หงษ์อี้</button>
+            <button onclick="switchPort('partner')" id="tab-partner" class="flex-1 py-4 rounded-xl font-bold transition-all duration-500 text-gray-500">เพชร</button>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <div class="gold-gradient p-8 rounded-[2rem] text-white shadow-xl relative overflow-hidden">
+            <div class="gold-gradient p-8 rounded-[2.5rem] text-white shadow-2xl relative overflow-hidden">
                 <div class="relative z-10">
-                    <div class="flex items-center gap-2 mb-1">
-                        <h2 id="dispPortName" class="text-xl font-bold">พอร์ตของฉัน</h2>
-                        <button onclick="editSettings()" class="opacity-50 hover:opacity-100 text-xs">✎ แก้ไข</button>
-                    </div>
-                    <p id="dispWeight" class="text-5xl font-black">0.00 <span class="text-lg font-normal">กรัม</span></p>
-                    <div id="profitBadge" class="mt-4 inline-block px-3 py-1 rounded-full bg-white/20 text-sm font-bold">
-                        ฿0 (0%)
+                    <p class="opacity-80 font-light mb-1">น้ำหนักทองสะสมในพอร์ต</p>
+                    <h2 id="dispWeight" class="text-5xl font-black mb-4">0.000 <span class="text-xl font-normal">กรัม</span></h2>
+                    <div id="profitContainer" class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20">
+                        <span id="dispProfit" class="text-lg font-bold">฿0</span>
+                        <span id="dispPercent" class="text-sm opacity-80">(0%)</span>
                     </div>
                 </div>
-                <div class="absolute -right-4 -bottom-4 opacity-10 text-8xl">🏆</div>
+                <div class="absolute right-[-20px] bottom-[-20px] text-[120px] opacity-10">⚜️</div>
             </div>
 
-            <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-gray-100">
-                <p class="text-gray-500 text-sm font-bold mb-3 italic">ความคืบหน้าสู่เป้าหมาย...</p>
-                <div class="flex justify-between items-end mb-2">
-                    <span id="progressPercent" class="text-3xl font-black text-gray-800">0%</span>
-                    <span id="goalText" class="text-sm text-gray-400 font-bold">0 / 5 บาททอง</span>
+            <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100 flex flex-col justify-center">
+                <div class="flex justify-between items-end mb-4">
+                    <p class="text-gray-500 font-bold uppercase tracking-widest text-xs">เป้าหมายความสำเร็จ</p>
+                    <p id="progressPercent" class="text-3xl font-black text-yellow-600">0%</p>
                 </div>
-                <div class="w-full bg-gray-100 rounded-full h-4 mb-4 overflow-hidden">
-                    <div id="progressBar" class="gold-gradient h-4 rounded-full transition-all duration-1000" style="width: 0%"></div>
+                <div class="w-full bg-gray-100 rounded-full h-5 mb-6 overflow-hidden border p-1">
+                    <div id="progressBar" class="gold-gradient h-full rounded-full transition-all duration-1000" style="width: 0%"></div>
                 </div>
-                <p id="daysLeftText" class="text-xs text-blue-500 font-semibold bg-blue-50 p-2 rounded-lg inline-block text-center w-full">เพิ่มข้อมูลเพื่อเริ่มวิเคราะห์วันสำเร็จ</p>
+                <div class="flex justify-between text-sm">
+                    <span id="goalText" class="font-bold text-gray-700">0 / 5 บาททอง</span>
+                    <span id="daysLeftText" class="text-blue-500 animate-pulse font-medium">เพิ่มข้อมูลเพื่อวิเคราะห์วันถึงเป้า</span>
+                </div>
             </div>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-                <h3 class="font-bold mb-4 text-gray-700">✨ บันทึกรายการใหม่</h3>
+            <div class="bg-white p-6 rounded-[2rem] shadow-lg border border-gray-50">
+                <h3 class="font-bold mb-6 text-gray-800 flex items-center gap-2">
+                    <span class="w-2 h-6 bg-yellow-500 rounded-full"></span>
+                    บันทึกการออม
+                </h3>
                 <div class="space-y-4">
-                    <input type="number" id="inAmt" placeholder="ซื้อไปเท่าไหร่ (บาท)" class="w-full p-4 bg-gray-50 rounded-2xl outline-none border focus:border-yellow-400 transition">
-                    <input type="number" id="inRate" placeholder="ราคาทองวันนี้ (บาทละ)" class="w-full p-4 bg-gray-50 rounded-2xl outline-none border focus:border-yellow-400 transition">
-                    <button onclick="saveEntry()" class="w-full bg-gray-800 text-white py-4 rounded-2xl font-bold hover:bg-black shadow-lg transition active:scale-95">บันทึกข้อมูล</button>
+                    <div>
+                        <label class="text-xs font-bold text-gray-400 ml-2 mb-1 block">เงินลงทุน (บาท)</label>
+                        <input type="number" id="inAmt" placeholder="เช่น 5000" class="w-full p-4 bg-gray-50 rounded-2xl outline-none focus:ring-2 ring-yellow-400 transition border-none text-lg font-bold">
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-gray-400 ml-2 mb-1 block">ราคาทองขณะซื้อ (บาทละ)</label>
+                        <input type="number" id="inRate" placeholder="เช่น 44500" class="w-full p-4 bg-gray-50 rounded-2xl outline-none focus:ring-2 ring-yellow-400 transition border-none text-lg font-bold">
+                    </div>
+                    <button onclick="saveEntry()" class="w-full gold-gradient text-white py-5 rounded-2xl font-black text-xl shadow-lg hover:brightness-110 active:scale-95 transition">บันทึก</button>
                 </div>
             </div>
 
-            <div class="lg:col-span-2">
-                <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 min-h-[300px]">
-                    <h3 class="font-bold mb-4 text-gray-700">📋 ประวัติย้อนหลัง</h3>
-                    <div id="historyList" class="space-y-3 max-h-[400px] overflow-y-auto pr-2">
-                        </div>
+            <div class="lg:col-span-2 bg-white p-6 rounded-[2rem] shadow-sm border border-gray-50">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="font-bold text-gray-800">ประวัติการซื้อ</h3>
+                    <button onclick="exportData()" class="text-xs text-blue-500">สำรองข้อมูล</button>
                 </div>
+                <div id="historyList" class="space-y-3 max-h-[400px] overflow-y-auto pr-2">
+                    </div>
             </div>
         </div>
-
-        <div class="mt-8 bg-white p-6 rounded-3xl shadow-sm border border-gray-100">
-            <h3 class="font-bold text-gray-700 mb-4">📈 กราฟการเติบโตรายพอร์ต</h3>
-            <canvas id="goldChart" height="120"></canvas>
+        
+        <div class="mt-8 bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-50">
+            <h3 class="font-bold text-gray-700 mb-6">กราฟการเติบโตสะสม</h3>
+            <canvas id="goldChart" height="100"></canvas>
         </div>
     </div>
 
     <script>
         let currentPort = 'mine';
-        let goldPrice = 43000; 
+        let globalGoldPrice = 0;
 
-        // โหลดข้อมูลจาก LocalStorage
-        let db = JSON.parse(localStorage.getItem('goldTogetherDB')) || {
+        // ดึงราคาทองจริงจาก API
+        async function fetchRealTimePrice() {
+            try {
+                // ใช้ Proxy เพื่อเลี่ยงปัญหา CORS สำหรับการเปิดไฟล์จากเครื่อง
+                const res = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent('https://thai-gold-api.vercel.app/latest'));
+                const json = await res.json();
+                const data = JSON.parse(json.contents);
+                
+                // ดึงราคาทองแท่ง (ขายออก)
+                globalGoldPrice = parseInt(data.response.price.gold.out.replace(/,/g, ''));
+                document.getElementById('livePriceDisplay').innerText = `฿${globalGoldPrice.toLocaleString()}`;
+                document.getElementById('priceTime').innerText = `อัปเดตเมื่อ: ${data.response.date} ${data.response.update_time}`;
+                refreshUI();
+            } catch (e) {
+                console.error("Price fetch error", e);
+                // ถ้า API ล่ม ให้ใช้ราคาตั้งต้นประมาณการปี 2026
+                globalGoldPrice = 45000;
+                document.getElementById('livePriceDisplay').innerText = `฿${globalGoldPrice.toLocaleString()}*`;
+                document.getElementById('priceTime').innerText = "ใช้ราคาประมาณการ (API ขัดข้อง)";
+                refreshUI();
+            }
+        }
+
+        let db = JSON.parse(localStorage.getItem('goldProjectV4')) || {
             settings: {
-                mine: { name: 'พอร์ตของฉัน', goal: 5 },
-                partner: { name: 'พอร์ตของแฟน', goal: 5 }
+                mine: { name: 'หงษ์อี้', goal: 10 },
+                partner: { name: 'เพชร', goal: 10 }
             },
             data: { mine: [], partner: [] }
         };
 
         function switchPort(port) {
             currentPort = port;
-            document.getElementById('tab-mine').className = port === 'mine' ? 'py-3 rounded-xl font-bold tab-active' : 'py-3 rounded-xl font-bold text-gray-400';
-            document.getElementById('tab-partner').className = port === 'partner' ? 'py-3 rounded-xl font-bold tab-active' : 'py-3 rounded-xl font-bold text-gray-400';
-            refreshUI();
-        }
-
-        function editSettings() {
-            const newName = prompt("ชื่อพอร์ตใหม่:", db.settings[currentPort].name);
-            const newGoal = prompt("เป้าหมาย (บาททอง):", db.settings[currentPort].goal);
-            if (newName) db.settings[currentPort].name = newName;
-            if (newGoal) db.settings[currentPort].goal = parseFloat(newGoal);
-            saveToDB();
+            document.getElementById('tab-mine').className = port === 'mine' ? 'flex-1 py-4 rounded-xl font-bold port-active' : 'flex-1 py-4 rounded-xl font-bold text-gray-500';
+            document.getElementById('tab-partner').className = port === 'partner' ? 'flex-1 py-4 rounded-xl font-bold port-active' : 'flex-1 py-4 rounded-xl font-bold text-gray-500';
             refreshUI();
         }
 
         function saveEntry() {
             const amt = parseFloat(document.getElementById('inAmt').value);
             const rate = parseFloat(document.getElementById('inRate').value);
-            if(!amt || !rate) return alert("กรุณากรอกข้อมูลให้ครบจ้า");
+            if(!amt || !rate) return alert("กรอกตัวเลขด้วยจ้า");
 
             const weight = (amt / rate) * 15.24;
             db.data[currentPort].push({
@@ -138,32 +158,24 @@
                 weight: weight
             });
 
-            saveToDB();
+            localStorage.setItem('goldProjectV4', JSON.stringify(db));
             document.getElementById('inAmt').value = '';
             document.getElementById('inRate').value = '';
             refreshUI();
         }
 
-        function deleteEntry(index) {
-            if(confirm('ชัวร์นะว่าจะลบรายการนี้?')) {
-                db.data[currentPort].splice(index, 1);
-                saveToDB();
+        function deleteEntry(idx) {
+            if(confirm('ลบรายการนี้ใช่ไหม?')) {
+                db.data[currentPort].splice(idx, 1);
+                localStorage.setItem('goldProjectV4', JSON.stringify(db));
                 refreshUI();
             }
         }
 
-        function saveToDB() {
-            localStorage.setItem('goldTogetherDB', JSON.stringify(db));
-        }
-
         function refreshUI() {
-            const config = db.settings[currentPort];
             const data = db.data[currentPort];
+            const config = db.settings[currentPort];
             
-            document.getElementById('dispPortName').innerText = config.name;
-            document.getElementById('tab-mine').innerText = db.settings.mine.name;
-            document.getElementById('tab-partner').innerText = db.settings.partner.name;
-
             let totalWeight = 0;
             let totalCost = 0;
             let listHTML = '';
@@ -171,37 +183,37 @@
             data.forEach((item, idx) => {
                 totalWeight += item.weight;
                 totalCost += item.amount;
-                const curVal = (item.weight / 15.24) * goldPrice;
-                const diff = curVal - item.amount;
-                const isPositive = diff >= 0;
+                const currentVal = (item.weight / 15.24) * globalGoldPrice;
+                const profit = currentVal - item.amount;
 
                 listHTML += `
-                    <div class="flex justify-between items-center p-4 bg-gray-50 rounded-2xl border border-gray-100 hover:bg-white transition shadow-sm">
-                        <div class="flex gap-4 items-center">
-                            <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600 font-bold text-xs">${idx+1}</div>
+                    <div class="flex justify-between items-center p-4 bg-gray-50 rounded-2xl hover:bg-white transition-all border border-transparent hover:border-yellow-100 group">
+                        <div class="flex items-center gap-4">
+                            <div class="text-[10px] font-bold text-gray-400 bg-white w-8 h-8 rounded-full flex items-center justify-center shadow-sm">${idx+1}</div>
                             <div>
-                                <p class="text-xs text-gray-400 font-bold uppercase">${new Date(item.date).toLocaleDateString('th-TH')}</p>
-                                <p class="font-bold text-gray-700">${item.weight.toFixed(3)} กรัม <span class="text-[10px] text-gray-400 font-normal">(@฿${item.buyRate.toLocaleString()})</span></p>
+                                <p class="text-xs text-gray-400 font-bold">${new Date(item.date).toLocaleDateString('th-TH')}</p>
+                                <p class="font-black text-gray-700">${item.weight.toFixed(3)} กรัม <span class="text-[10px] font-normal text-gray-400">@${item.buyRate.toLocaleString()}</span></p>
                             </div>
                         </div>
                         <div class="text-right">
-                            <p class="font-black ${isPositive ? 'text-green-500' : 'text-red-500'}">${isPositive ? '+' : ''}${Math.round(diff).toLocaleString()} ฿</p>
-                            <button onclick="deleteEntry(${idx})" class="text-[10px] text-gray-300 hover:text-red-500">ลบออก</button>
+                            <p class="font-black ${profit >= 0 ? 'text-green-500' : 'text-red-500'}">${profit >= 0 ? '▲' : '▼'} ฿${Math.abs(Math.round(profit)).toLocaleString()}</p>
+                            <button onclick="deleteEntry(${idx})" class="text-[10px] text-red-300 opacity-0 group-hover:opacity-100 transition">ลบข้อมูล</button>
                         </div>
                     </div>`;
             });
 
-            document.getElementById('historyList').innerHTML = listHTML || '<div class="text-center py-20 text-gray-300">เริ่มสะสมทองชิ้นแรกกันเลย!</div>';
-            document.getElementById('dispWeight').innerHTML = `${totalWeight.toFixed(3)} <span class="text-lg font-normal">กรัม</span>`;
+            document.getElementById('historyList').innerHTML = listHTML || '<p class="text-center py-10 text-gray-300">ไม่มีข้อมูลการซื้อ</p>';
+            document.getElementById('dispWeight').innerText = totalWeight.toFixed(3);
             
-            // Profit Calc
-            const currentTotalVal = (totalWeight / 15.24) * goldPrice;
-            const totalProfit = currentTotalVal - totalCost;
-            const profitPct = totalCost > 0 ? (totalProfit / totalCost) * 100 : 0;
-            document.getElementById('profitBadge').innerText = `${totalProfit >= 0 ? '+' : ''}฿${Math.round(totalProfit).toLocaleString()} (${profitPct.toFixed(1)}%)`;
-            document.getElementById('profitBadge').className = `mt-4 inline-block px-3 py-1 rounded-full text-sm font-bold ${totalProfit >= 0 ? 'bg-green-500/20 text-green-100' : 'bg-red-500/20 text-red-100'}`;
+            const totalVal = (totalWeight / 15.24) * globalGoldPrice;
+            const totalProfit = totalVal - totalCost;
+            const totalPct = totalCost > 0 ? (totalProfit / totalCost) * 100 : 0;
+            
+            document.getElementById('dispProfit').innerText = (totalProfit >= 0 ? '+ ฿' : '- ฿') + Math.abs(Math.round(totalProfit)).toLocaleString();
+            document.getElementById('dispPercent').innerText = `(${totalPct.toFixed(2)}%)`;
+            document.getElementById('profitContainer').className = `inline-flex items-center gap-2 px-4 py-2 rounded-2xl border backdrop-blur-md ${totalProfit >= 0 ? 'bg-green-500/20 border-green-400/30' : 'bg-red-500/20 border-red-400/30'}`;
 
-            // Goal
+            // Progress
             const weightInBaht = totalWeight / 15.24;
             const progress = Math.min((weightInBaht / config.goal) * 100, 100);
             document.getElementById('progressBar').style.width = progress + '%';
@@ -210,22 +222,16 @@
 
             // Prediction
             if(data.length >= 2) {
-                const daysDiff = (new Date(data[data.length-1].date) - new Date(data[0].date)) / (1000*60*60*24);
-                const avgPerDay = totalWeight / (daysDiff || 1);
-                const remaining = (config.goal * 15.24) - totalWeight;
-                if(remaining > 0) {
-                    const daysToGoal = Math.ceil(remaining / avgPerDay);
-                    document.getElementById('daysLeftText').innerText = `🔥 อีกประมาณ ${daysToGoal.toLocaleString()} วัน จะถึงเป้าหมาย!`;
+                const dayDiff = (new Date(data[data.length-1].date) - new Date(data[0].date)) / 86400000;
+                const gainPerDay = totalWeight / (dayDiff || 1);
+                const remain = (config.goal * 15.24) - totalWeight;
+                if(remain > 0) {
+                    const days = Math.ceil(remain / gainPerDay);
+                    document.getElementById('daysLeftText').innerText = `อีกประมาณ ${days.toLocaleString()} วันจะสำเร็จ!`;
                 } else {
-                    document.getElementById('daysLeftText').innerText = `🎉 ยินดีด้วย! คุณถึงเป้าหมายแล้ว`;
+                    document.getElementById('daysLeftText').innerText = "เป้าหมายสำเร็จแล้ว! 🎊";
                 }
             }
-
-            // Grand Summary
-            const totalBothWeight = (db.data.mine.reduce((s,i)=>s+i.weight,0) + db.data.partner.reduce((s,i)=>s+i.weight,0));
-            const totalBothVal = (totalBothWeight / 15.24) * goldPrice;
-            document.getElementById('grandWeight').innerText = totalBothWeight.toFixed(3) + ' กรัม';
-            document.getElementById('grandValue').innerText = '฿' + Math.round(totalBothVal).toLocaleString();
 
             updateChart();
         }
@@ -234,32 +240,47 @@
         function updateChart() {
             const ctx = document.getElementById('goldChart').getContext('2d');
             if(chartObj) chartObj.destroy();
-            const labels = db.data[currentPort].map(i => new Date(i.date).toLocaleDateString('th-TH'));
-            let runT = 0;
-            const pts = db.data[currentPort].map(i => { runT += i.weight; return runT; });
+            
+            const data = db.data[currentPort];
+            let sum = 0;
+            const points = data.map(d => { sum += d.weight; return sum; });
+            const labels = data.map(d => new Date(d.date).toLocaleDateString('th-TH'));
 
             chartObj = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: 'น้ำหนักสะสม',
-                        data: pts,
-                        borderColor: '#ca8a04',
-                        backgroundColor: 'rgba(202, 138, 4, 0.1)',
-                        fill: true, tension: 0.3, pointRadius: 4
+                        label: 'ทองสะสม (กรัม)',
+                        data: points,
+                        borderColor: '#d97706',
+                        backgroundColor: 'rgba(217, 119, 6, 0.05)',
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#d97706'
                     }]
                 },
-                options: { 
+                options: {
                     responsive: true,
                     plugins: { legend: { display: false } },
-                    scales: { y: { display: true }, x: { grid: { display: false } } }
+                    scales: { x: { grid: { display: false } } }
                 }
             });
         }
 
-        // Initialize
-        refreshUI();
+        function exportData() {
+            const blob = new Blob([JSON.stringify(db)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `gold-backup-${new Date().toLocaleDateString()}.json`;
+            a.click();
+        }
+
+        // Run
+        fetchRealTimePrice();
+        setInterval(fetchRealTimePrice, 300000); // อัปเดตราคาอัตโนมัติทุก 5 นาที
+        switchPort('mine');
     </script>
 </body>
 </html>
