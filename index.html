@@ -1,47 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Gold Saving Tracker V4</title>
+
+<style>
+body { font-family: Arial; padding:20px; max-width:500px; margin:auto; }
+input, button { padding:8px; margin:5px 0; width:100%; }
+button { cursor:pointer; }
+.tabbtn { width:49%; }
+.hidden { display:none; }
+.card { background:#f4f4f4; padding:12px; margin-top:10px; border-radius:8px; }
+.progress { background:#ddd; border-radius:10px; overflow:hidden; height:18px; margin-top:5px;}
+.progress-bar { background:#c9a227; height:100%; }
+h2 { text-align:center; }
+.goldbox { background:#fff8dc; padding:10px; border-radius:8px; margin-bottom:15px;}
+</style>
+</head>
+
+<body>
+
+<h2>Gold Saving Tracker V4</h2>
+
+<div class="goldbox">
+<label>กรอกราคาทองวันนี้ (บาท/บาททอง)</label>
+<input type="number" id="goldPriceInput" placeholder="เช่น 41000">
+<button onclick="setGoldPrice()">บันทึกราคา</button>
+<p id="goldPriceDisplay">ยังไม่ได้ตั้งราคาทอง</p>
+</div>
+
+<button class="tabbtn" onclick="switchTab(1)">คนที่ 1</button>
+<button class="tabbtn" onclick="switchTab(2)">คนที่ 2</button>
+
+<div id="person1"></div>
+<div id="person2" class="hidden"></div>
+
 <script>
 const BAHT_TO_GRAM = 15.244;
 let currentGoldPrice = 0;
 
-async function fetchGoldPrice() {
-  try {
-    // ใช้ proxy ที่เสถียรกว่า
-    const response = await fetch(
-      "https://api.allorigins.win/get?url=" +
-      encodeURIComponent("https://www.goldtraders.or.th/api/getprices")
-    );
-
-    const proxyData = await response.json();
-    const data = JSON.parse(proxyData.contents);
-
-    currentGoldPrice = parseFloat(data.response.price);
-
-    if (!currentGoldPrice) throw "no price";
-
-    document.getElementById("goldPriceDisplay").innerHTML =
-      "ราคาทองวันนี้: " + currentGoldPrice.toLocaleString() + " บาท";
-
-  } catch (error) {
-    document.getElementById("goldPriceDisplay").innerHTML =
-      `โหลดอัตโนมัติไม่สำเร็จ 
-      <br><br>
-      <input type="number" id="manualPrice" placeholder="กรอกราคาทองเอง">
-      <button onclick="setManualPrice()">ยืนยันราคา</button>`;
-  }
-
+function setGoldPrice(){
+  const price = parseFloat(document.getElementById("goldPriceInput").value);
+  if(!price) return alert("กรอกราคาให้ถูกต้อง");
+  currentGoldPrice = price;
+  localStorage.setItem("currentGoldPrice", price);
+  document.getElementById("goldPriceDisplay").innerHTML =
+    "ราคาทองวันนี้: " + price.toLocaleString() + " บาท";
   updateSummary(1);
   updateSummary(2);
 }
 
-function setManualPrice(){
-  const manual = parseFloat(document.getElementById("manualPrice").value);
-  if(!manual) return alert("กรอกราคาให้ถูกต้อง");
-
-  currentGoldPrice = manual;
-  document.getElementById("goldPriceDisplay").innerHTML =
-    "ราคาทองปัจจุบัน: " + currentGoldPrice.toLocaleString() + " บาท";
-
-  updateSummary(1);
-  updateSummary(2);
+function loadGoldPrice(){
+  const saved = localStorage.getItem("currentGoldPrice");
+  if(saved){
+    currentGoldPrice = parseFloat(saved);
+    document.getElementById("goldPriceDisplay").innerHTML =
+      "ราคาทองวันนี้: " + currentGoldPrice.toLocaleString() + " บาท";
+  }
 }
 
 function switchTab(n){
@@ -131,5 +146,8 @@ function updateSummary(person){
 
 init(1);
 init(2);
-fetchGoldPrice();
+loadGoldPrice();
 </script>
+
+</body>
+</html>
