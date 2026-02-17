@@ -1,183 +1,208 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8" />
-<title>Gold Saving Tracker V5</title>
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="UTF-8">
+<title>Gold Saving Tracker (Auto)</title>
+
 <style>
-body {
+body{
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background:#f6f7f9;
-  margin:0;
+  background:#fafafa;
   padding:20px;
+  max-width:520px;
+  margin:auto;
 }
-h1 { text-align:center; }
-.card {
-  background:#fff;
-  border-radius:12px;
-  padding:16px;
-  margin-bottom:16px;
-  box-shadow:0 2px 8px rgba(0,0,0,.06);
-}
-label { font-weight:600; }
-input, button {
+h2{text-align:center;}
+input, button{
   width:100%;
   padding:10px;
   margin-top:6px;
-  margin-bottom:12px;
-  border-radius:8px;
-  border:1px solid #ccc;
-  font-size:16px;
+  font-size:15px;
 }
-button {
-  background:#c9a227;
-  color:#fff;
+button{
+  background:#d4af37;
   border:none;
-  font-weight:600;
+  border-radius:6px;
+  cursor:pointer;
 }
-button:active { opacity:.8; }
-small { color:#666; }
-canvas { margin-top:12px; }
+button:hover{opacity:0.9}
+.card{
+  background:#fff;
+  padding:14px;
+  border-radius:10px;
+  margin-top:14px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.08);
+}
+.tab{
+  display:flex;
+  gap:6px;
+}
+.tab button{
+  width:50%;
+  background:#eee;
+}
+.tab .active{
+  background:#d4af37;
+}
+.hidden{display:none;}
+.progress{
+  background:#eee;
+  height:14px;
+  border-radius:10px;
+  overflow:hidden;
+}
+.progress-bar{
+  background:#d4af37;
+  height:100%;
+}
+.small{font-size:13px;color:#666}
 </style>
 </head>
 
 <body>
 
-<h1>💛 Gold Saving Tracker</h1>
+<h2>💰 Gold Saving Tracker</h2>
 
 <div class="card">
-  <div id="goldPriceText">กำลังโหลดราคาทอง…</div>
-  <small>ราคาทองคำแท่ง (ขายออก)</small>
+  <b id="goldPriceText">⏳ กำลังโหลดราคาทอง…</b>
+  <div class="small">อ้างอิงสมาคมค้าทองคำ</div>
 </div>
 
-<div class="card">
-  <label>ชื่อเจ้าของพอร์ต</label>
-  <input id="ownerName" placeholder="เช่น หงษ์อี้">
-
-  <label>ราคาทองตอนซื้อ (บาท/บาททอง)</label>
-  <input type="number" id="buyPrice">
-
-  <label>จำนวนเงินที่ออม (บาท)</label>
-  <input type="number" id="amount">
-
-  <button onclick="addRecord()">บันทึกการออม</button>
+<div class="tab">
+  <button id="tab1" class="active" onclick="switchTab(1)">คนที่ 1</button>
+  <button id="tab2" onclick="switchTab(2)">คนที่ 2</button>
 </div>
 
-<div class="card">
-  <b>สรุปพอร์ต</b><br><br>
-  เงินออมสะสม: <span id="sumMoney">0</span> บาท<br>
-  บาททองสะสม: <span id="sumBaht">0</span> บาททอง<br>
-  มูลค่าปัจจุบัน: <span id="sumValue">0</span> บาท
-</div>
+<div id="person1"></div>
+<div id="person2" class="hidden"></div>
 
-<div class="card">
-  <b>📈 มูลค่าทองรวม</b>
-  <canvas id="chartValue"></canvas>
-</div>
-
-<div class="card">
-  <b>💰 เงินออมสะสม</b>
-  <canvas id="chartMoney"></canvas>
-</div>
-
-<div class="card">
-  <b>🪙 บาททองสะสม</b>
-  <canvas id="chartBaht"></canvas>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 const BAHT_TO_GRAM = 15.244;
 let goldPrice = 0;
 
-function loadData() {
-  return JSON.parse(localStorage.getItem("goldData") || "[]");
-}
-function saveData(data) {
-  localStorage.setItem("goldData", JSON.stringify(data));
-}
-
-async function fetchGoldPrice() {
-  try {
+// ===== ดึงราคาทองอัตโนมัติ =====
+async function fetchGoldPrice(){
+  try{
     const res = await fetch(
       "https://api.allorigins.win/raw?url=" +
       encodeURIComponent("https://www.goldtraders.or.th/api/getprices")
     );
     const data = await res.json();
-    goldPrice = parseFloat(data.gold.bar.sell.replace(/,/g,""));
-    localStorage.setItem("lastGoldPrice", goldPrice);
-  } catch {
-    goldPrice = parseFloat(localStorage.getItem("lastGoldPrice") || 0);
+
+    goldPrice = parseFloat(
+      data.gold.bar.sell.replace(/,/g,"")
+    );
+
+    document.getElementById("goldPriceText").innerText =
+      "ราคาทองวันนี้: " + goldPrice.toLocaleString() + " บาท / บาททอง";
+
+    updateSummary(1);
+    updateSummary(2);
+
+  }catch(e){
+    document.getElementById("goldPriceText").innerText =
+      "❌ โหลดราคาทองไม่สำเร็จ";
+  }
+}
+
+// ===== UI =====
+function switchTab(n){
+  document.getElementById("person1").classList.add("hidden");
+  document.getElementById("person2").classList.add("hidden");
+  document.getElementById("tab1").classList.remove("active");
+  document.getElementById("tab2").classList.remove("active");
+
+  document.getElementById("person"+n).classList.remove("hidden");
+  document.getElementById("tab"+n).classList.add("active");
+}
+
+function init(person){
+  const el = document.getElementById("person"+person);
+  el.innerHTML = `
+  <div class="card">
+    <label>ชื่อเจ้าของพอร์ต</label>
+    <input id="name${person}" placeholder="เช่น หงษ์อี้">
+
+    <label>เป้าหมาย (บาททอง)</label>
+    <input type="number" id="goal${person}" placeholder="เช่น 1">
+
+    <hr>
+
+    <label>ราคาที่ซื้อ (บาท/บาททอง)</label>
+    <input type="number" id="buyPrice${person}">
+
+    <label>จำนวนเงินที่ซื้อ (บาท)</label>
+    <input type="number" id="amount${person}">
+
+    <button onclick="addRecord(${person})">➕ บันทึก</button>
+  </div>
+
+  <div id="summary${person}" class="card"></div>
+  `;
+  updateSummary(person);
+}
+
+// ===== Logic =====
+function addRecord(person){
+  const buyPrice = parseFloat(document.getElementById("buyPrice"+person).value);
+  const amount = parseFloat(document.getElementById("amount"+person).value);
+
+  if(!buyPrice || !amount){
+    alert("กรอกข้อมูลให้ครบ");
+    return;
   }
 
-  document.getElementById("goldPriceText").innerText =
-    goldPrice
-      ? "ราคาทองวันนี้: " + goldPrice.toLocaleString() + " บาท"
-      : "ไม่สามารถโหลดราคาทองได้";
-}
-
-function addRecord() {
-  const buyPrice = +document.getElementById("buyPrice").value;
-  const amount = +document.getElementById("amount").value;
-  if (!buyPrice || !amount) return alert("กรอกข้อมูลให้ครบ");
-
   const bahtGold = amount / buyPrice;
-  const data = loadData();
-  data.push({
-    date: new Date().toISOString(),
-    amount,
-    bahtGold
-  });
-  saveData(data);
-  render();
+  const gram = bahtGold * BAHT_TO_GRAM;
+
+  const key = "gold"+person;
+  const data = JSON.parse(localStorage.getItem(key)) || [];
+  data.push({amount, bahtGold, gram});
+  localStorage.setItem(key, JSON.stringify(data));
+
+  updateSummary(person);
 }
 
-let chartValue, chartMoney, chartBaht;
+function updateSummary(person){
+  const data = JSON.parse(localStorage.getItem("gold"+person)) || [];
 
-function render() {
-  const data = loadData();
-  let sumMoney = 0;
-  let sumBaht = 0;
-
-  const labels = [];
-  const moneyArr = [];
-  const bahtArr = [];
-  const valueArr = [];
-
-  data.forEach(d => {
-    sumMoney += d.amount;
-    sumBaht += d.bahtGold;
-    labels.push(new Date(d.date).toLocaleDateString());
-    moneyArr.push(sumMoney);
-    bahtArr.push(sumBaht);
-    valueArr.push(sumBaht * goldPrice);
+  let money = 0, baht = 0, gram = 0;
+  data.forEach(d=>{
+    money += d.amount;
+    baht += d.bahtGold;
+    gram += d.gram;
   });
 
-  document.getElementById("sumMoney").innerText = sumMoney.toFixed(2);
-  document.getElementById("sumBaht").innerText = sumBaht.toFixed(4);
-  document.getElementById("sumValue").innerText = (sumBaht * goldPrice).toFixed(2);
+  const name = document.getElementById("name"+person)?.value || "ยังไม่ได้ตั้งชื่อ";
+  const goal = parseFloat(document.getElementById("goal"+person)?.value) || 0;
 
-  const makeChart = (el, label, dataArr, color) =>
-    new Chart(el, {
-      type:"line",
-      data:{ labels, datasets:[{ label, data:dataArr, borderColor:color, fill:false }]},
-      options:{ responsive:true }
-    });
+  const currentValue = goldPrice ? baht * goldPrice : 0;
+  const profit = currentValue - money;
 
-  if (chartValue) chartValue.destroy();
-  if (chartMoney) chartMoney.destroy();
-  if (chartBaht) chartBaht.destroy();
+  let percent = goal ? (baht/goal)*100 : 0;
+  if(percent > 100) percent = 100;
 
-  chartValue = makeChart(chartValueCanvas, "มูลค่าทอง", valueArr, "#c9a227");
-  chartMoney = makeChart(chartMoneyCanvas, "เงินออม", moneyArr, "#4caf50");
-  chartBaht  = makeChart(chartBahtCanvas,  "บาททอง", bahtArr,  "#2196f3");
+  document.getElementById("summary"+person).innerHTML = `
+    <b>พอร์ตของ: ${name}</b><br><br>
+    เงินสะสม: ${money.toFixed(2)} บาท<br>
+    ทองสะสม: ${baht.toFixed(4)} บาททอง<br>
+    เทียบเป็นกรัม: ${gram.toFixed(4)} กรัม<br><br>
+
+    มูลค่าปัจจุบัน: ${currentValue.toFixed(2)} บาท<br>
+    กำไร/ขาดทุน: ${profit.toFixed(2)} บาท<br><br>
+
+    เป้าหมาย: ${goal} บาททอง<br>
+    ความคืบหน้า: ${percent.toFixed(1)}%
+    <div class="progress">
+      <div class="progress-bar" style="width:${percent}%"></div>
+    </div>
+  `;
 }
 
-const chartValueCanvas = document.getElementById("chartValue");
-const chartMoneyCanvas = document.getElementById("chartMoney");
-const chartBahtCanvas  = document.getElementById("chartBaht");
-
-fetchGoldPrice().then(render);
+// ===== start =====
+init(1);
+init(2);
+fetchGoldPrice();
 </script>
 
 </body>
