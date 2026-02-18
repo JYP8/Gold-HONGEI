@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gold Sync Ultimate - หงษ์อี้ & เพชร</title>
+    <title>Gold Sync v.2026 - หงษ์อี้ & เพชร</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
     <style>body { font-family: 'Kanit', sans-serif; }</style>
@@ -12,11 +12,11 @@
 
     <div class="max-w-md mx-auto">
         <div class="bg-gradient-to-br from-amber-500 to-yellow-600 text-white p-8 rounded-[2.5rem] shadow-2xl mb-6 text-center border-b-4 border-yellow-700">
-            <h1 class="text-[10px] font-bold opacity-90 uppercase tracking-[0.2em]">Market Price (via Google)</h1>
-            <p id="livePrice" class="text-5xl font-black my-2 tracking-tighter">รอซิงก์...</p>
+            <h1 class="text-[10px] font-bold opacity-90 uppercase tracking-[0.2em]">Gold Association Price</h1>
+            <p id="livePrice" class="text-5xl font-black my-2 tracking-tighter italic">รอซิงก์ราคา...</p>
             <div class="flex justify-center items-center gap-2 text-[10px] bg-black/20 px-3 py-1 rounded-full inline-flex">
                 <span id="priceDot" class="h-2 w-2 rounded-full bg-red-500"></span>
-                <span id="updateTime">กำลังเชื่อมต่อฐานข้อมูล...</span>
+                <span id="updateTime">กำลังดึงข้อมูลล่าสุด...</span>
             </div>
         </div>
 
@@ -32,72 +32,74 @@
                     <h2 id="totalWeight" class="text-4xl font-black text-gray-800 my-1">0.000 <span class="text-sm font-normal text-gray-400">กรัม</span></h2>
                 </div>
                 <div class="text-right">
-                    <p class="text-[10px] text-gray-400 font-bold">มูลค่าพอร์ตตอนนี้</p>
+                    <p class="text-[10px] text-gray-400 font-bold uppercase">มูลค่าพอร์ต</p>
                     <p id="profitText" class="text-xl font-bold text-green-600">฿0</p>
                 </div>
             </div>
             
             <div class="space-y-2">
                 <div class="flex justify-between items-end mb-1 text-[10px] font-bold uppercase">
-                    <span class="text-gray-400">ความสำเร็จ</span>
+                    <span class="text-gray-400 tracking-widest">Progress</span>
                     <span id="goalPercent" class="text-amber-600">0%</span>
                 </div>
                 <div class="w-full bg-gray-100 h-3 rounded-full overflow-hidden shadow-inner">
                     <div id="goalBar" class="bg-gradient-to-r from-yellow-400 to-amber-500 h-full transition-all duration-1000" style="width: 0%"></div>
                 </div>
                 <div class="flex justify-between items-center mt-2">
-                    <span id="goalLabel" class="text-[10px] text-gray-500 font-bold">0 / 10 บาททอง</span>
-                    <button onclick="setNewGoal()" class="text-[9px] bg-amber-50 text-amber-600 px-2 py-1 rounded font-bold uppercase">Set Goal</button>
+                    <span id="goalLabel" class="text-[10px] text-gray-500 font-bold italic">0 / 10 บาททอง</span>
+                    <button onclick="setNewGoal()" class="text-[9px] bg-amber-50 text-amber-600 px-2 py-1 rounded font-bold">ปรับเป้าหมาย</button>
                 </div>
             </div>
         </div>
 
-        <div class="bg-white p-6 rounded-[2rem] shadow-sm mb-6">
+        <div class="bg-white p-6 rounded-[2rem] shadow-sm mb-6 border border-gray-100">
             <div class="space-y-3">
-                <input type="number" id="inAmt" placeholder="เงินที่ซื้อ (฿)" class="w-full p-4 bg-gray-50 rounded-2xl outline-none focus:ring-2 ring-amber-400 font-bold text-lg border-none">
-                <input type="number" id="inRate" placeholder="ราคาตอนซื้อ (฿)" class="w-full p-4 bg-gray-50 rounded-2xl outline-none focus:ring-2 ring-amber-400 font-bold text-lg border-none">
-                <button onclick="saveToCloud()" id="saveBtn" class="w-full bg-gray-900 text-white py-5 rounded-2xl font-black text-lg shadow-xl active:scale-95 transition-all">บันทึกพอร์ต 🚀</button>
+                <input type="number" id="inAmt" placeholder="ยอดเงินซื้อ (บาท)" class="w-full p-4 bg-gray-50 rounded-2xl outline-none focus:ring-2 ring-amber-400 font-bold text-lg border-none shadow-inner">
+                <input type="number" id="inRate" placeholder="ราคาตอนซื้อ (บาทละ)" class="w-full p-4 bg-gray-50 rounded-2xl outline-none focus:ring-2 ring-amber-400 font-bold text-lg border-none shadow-inner">
+                <button onclick="saveToCloud()" id="saveBtn" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black text-lg shadow-xl active:scale-95 transition-all">บันทึกข้อมูล 🚀</button>
             </div>
         </div>
 
         <div class="bg-white p-6 rounded-[2rem] shadow-sm mb-10 border border-gray-100">
             <h3 class="font-bold text-gray-800 mb-4 flex items-center justify-between text-sm">
                 <span>ประวัติล่าสุด</span>
-                <span id="syncStatus" class="text-[9px] font-normal text-gray-400 uppercase">Syncing...</span>
+                <span id="syncStatus" class="text-[9px] font-normal text-gray-400 uppercase tracking-tighter italic italic">Syncing...</span>
             </h3>
             <div id="historyLogs" class="space-y-3 max-h-80 overflow-y-auto pr-1"></div>
         </div>
     </div>
 
     <script>
-        // URL ล่าสุดที่คุณส่งมา
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbwujjavIuCqNMYu7WHskhSbiSwk9Uw3n_EQlA4NTAhEuSkrsSNvp1Npw8N-xNUYRoqBxw/exec';
+        // ลิงก์ใหม่ที่คุณส่งมา
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbxvZr8alAo3a3a0C6FubKwMaELnUm8kCcCCxLMv2HUPaoXwNzAU3Woc3uzPSjw3orNG6A/exec';
 
         let currentPort = 'หงษ์อี้';
         let cloudData = [];
         let marketPrice = 0;
 
-        // ดึงทั้งราคาทองและข้อมูลจาก Google Apps Script พร้อมกัน
+        // ดึงราคาทองและข้อมูลพอร์ตจาก Google Apps Script
         async function syncData() {
             try {
                 const res = await fetch(scriptURL);
                 const result = await res.json();
                 
-                // 1. รับราคาทองจากหลังบ้าน (Google Script)
-                if (result.price) {
+                // 1. รับราคาทองที่ Google ดึงมาให้
+                if (result.price && result.price > 1000) {
                     marketPrice = result.price;
                     document.getElementById('livePrice').innerText = `฿${marketPrice.toLocaleString()}`;
-                    document.getElementById('updateTime').innerText = `อัปเดต: ${new Date().toLocaleTimeString()}`;
+                    document.getElementById('updateTime').innerText = `อัปเดต: ${new Date().toLocaleTimeString('th-TH')}`;
                     document.getElementById('priceDot').className = "h-2 w-2 rounded-full bg-green-500 animate-pulse";
+                } else {
+                    document.getElementById('livePrice').innerText = "ราคาขัดข้อง";
                 }
 
-                // 2. รับข้อมูลพอร์ต
+                // 2. รับข้อมูลจาก Sheet
                 cloudData = result.data || [];
-                document.getElementById('syncStatus').innerText = "เชื่อมต่อล่าสุด: " + new Date().toLocaleTimeString();
+                document.getElementById('syncStatus').innerText = "ซิงก์สำเร็จ: " + new Date().toLocaleTimeString();
                 
                 refreshUI();
             } catch (e) {
-                document.getElementById('syncStatus').innerText = "การเชื่อมต่อขัดข้อง";
+                document.getElementById('syncStatus').innerText = "เชื่อมต่อล้มเหลว";
                 console.error("Sync error:", e);
             }
         }
@@ -108,7 +110,7 @@
         }
 
         function setNewGoal() {
-            const newGoal = prompt("ตั้งเป้าหมายสะสมใหม่ (บาททอง):", localStorage.getItem('goal_'+currentPort) || 10);
+            const newGoal = prompt("ตั้งเป้าหมายการสะสมใหม่ (บาททอง):", localStorage.getItem('goal_'+currentPort) || 10);
             if(newGoal) {
                 localStorage.setItem('goal_'+currentPort, newGoal);
                 refreshUI();
@@ -118,11 +120,11 @@
         async function saveToCloud() {
             const amt = document.getElementById('inAmt').value;
             const rate = document.getElementById('inRate').value;
-            if(!amt || !rate) return alert("กรอกข้อมูลก่อนนะจ๊ะ!");
+            if(!amt || !rate) return alert("กรอกตัวเลขก่อนนะคะ!");
 
             const saveBtn = document.getElementById('saveBtn');
             saveBtn.disabled = true;
-            saveBtn.innerText = "กำลังบันทึกข้อมูล...";
+            saveBtn.innerText = "กำลังบินไป Google Sheets...";
 
             const weight = (parseFloat(amt) / parseFloat(rate)) * 15.24;
             const payload = { port: currentPort, amount: parseFloat(amt), rate: parseFloat(rate), weight: weight };
@@ -131,11 +133,11 @@
                 await fetch(scriptURL, { method: 'POST', body: JSON.stringify(payload) });
                 document.getElementById('inAmt').value = '';
                 document.getElementById('inRate').value = '';
-                syncData(); // ซิงก์ข้อมูลใหม่ทันทีหลังบันทึก
-            } catch (e) { alert("บันทึกไม่สำเร็จ!"); }
+                syncData(); // ดึงข้อมูลใหม่ทันที
+            } catch (e) { alert("บันทึกไม่สำเร็จ ลองดูเน็ตอีกทีนะ"); }
             
             saveBtn.disabled = false;
-            saveBtn.innerText = "บันทึกพอร์ต 🚀";
+            saveBtn.innerText = "บันทึกข้อมูล 🚀";
         }
 
         function refreshUI() {
@@ -144,7 +146,7 @@
             document.getElementById('activeName').innerText = currentPort;
 
             let totalW = 0, html = '';
-            // ประมวลผลข้อมูล (ข้ามหัวตารางแถว 0)
+            // ประมวลผลแถว (ข้ามหัวตารางแถวที่ 0)
             for(let i=cloudData.length-1; i>=1; i--) {
                 if(cloudData[i][1] === currentPort) {
                     const rowW = parseFloat(cloudData[i][4]);
@@ -163,15 +165,16 @@
             }
 
             document.getElementById('totalWeight').innerHTML = `${totalW.toFixed(3)} <span class="text-sm font-normal text-gray-400">กรัม</span>`;
-            document.getElementById('historyLogs').innerHTML = html || '<div class="text-center py-6 text-gray-300 italic text-xs">ยังไม่มีข้อมูลออม</div>';
+            document.getElementById('historyLogs').innerHTML = html || '<div class="text-center py-6 text-gray-300 italic text-xs">ยังไม่มีประวัติ</div>';
             
-            // คำนวณมูลค่าพอร์ต และ % การออม
+            // คำนวณมูลค่าพอร์ต (น้ำหนักรวม / 15.24 * ราคาตลาด)
             const curBaht = totalW / 15.24;
             if(marketPrice > 0) {
                 const currentVal = curBaht * marketPrice;
                 document.getElementById('profitText').innerText = `฿${Math.round(currentVal).toLocaleString()}`;
             }
 
+            // คำนวณ % การสะสม
             const myGoal = parseFloat(localStorage.getItem('goal_'+currentPort)) || 10;
             const progress = (curBaht / myGoal) * 100;
             document.getElementById('goalBar').style.width = Math.min(progress, 100) + '%';
@@ -179,9 +182,9 @@
             document.getElementById('goalLabel').innerText = `${curBaht.toFixed(2)} / ${myGoal} บาททอง`;
         }
 
-        // เริ่มต้นซิงก์ข้อมูล
+        // เริ่มระบบ
         syncData();
-        setInterval(syncData, 60000); // ซิงก์ทุกๆ 1 นาที
+        setInterval(syncData, 60000); // ซิงก์ราคาทุก 1 นาที
     </script>
 </body>
 </html>
