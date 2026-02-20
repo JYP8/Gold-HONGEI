@@ -3,15 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gold Port Final 2026</title>
+    <title>Gold Savings Pro - หงษ์อี้ & เพชร</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
     <style>body { font-family: 'Kanit', sans-serif; }</style>
 </head>
-<body class="bg-slate-50 min-h-screen p-4">
+<body class="bg-slate-50 min-h-screen p-4 pb-10">
     <div class="max-w-md mx-auto">
-        <div class="bg-gradient-to-br from-amber-500 to-yellow-600 text-white p-8 rounded-[2.5rem] shadow-2xl mb-6 text-center border-b-4 border-amber-800">
-            <h1 class="text-[10px] font-bold opacity-80 uppercase tracking-widest">ราคาประเมินปัจจุบัน</h1>
+        <div class="bg-gradient-to-br from-amber-500 to-yellow-600 text-white p-8 rounded-[2.5rem] shadow-2xl mb-6 text-center relative overflow-hidden">
+            <h1 class="text-[10px] font-bold opacity-80 uppercase tracking-widest">ราคาประเมินปัจจุบัน (Z4)</h1>
             <p id="livePrice" class="text-5xl font-black my-2">--Loading--</p>
             <div class="inline-flex items-center gap-2 bg-black/20 px-4 py-1 rounded-full text-[10px]">
                 <span id="dot" class="h-2 w-2 rounded-full bg-red-500 animate-pulse"></span>
@@ -19,150 +20,205 @@
             </div>
         </div>
 
-        <div class="bg-white p-2 rounded-2xl shadow-sm mb-6 flex gap-2">
-            <button onclick="switchPort('หงษ์อี้')" id="btnH" class="flex-1 py-3 rounded-xl font-bold transition-all">หงษ์อี้</button>
-            <button onclick="switchPort('เพชร')" id="btnP" class="flex-1 py-3 rounded-xl font-bold transition-all">เพชร</button>
-        </div>
-
-        <div class="bg-white p-6 rounded-[2.5rem] shadow-xl mb-6 border-t-4 border-amber-500">
-            <div class="grid grid-cols-2 gap-4 mb-6">
-                <div>
-                    <p class="text-[10px] text-gray-400 font-bold uppercase">พอร์ตของ <span id="activeName" class="text-amber-600">หงษ์อี้</span></p>
-                    <h2 id="totalWeight" class="text-3xl font-black text-slate-800">0.000 กรัม</h2>
-                </div>
-                <div class="text-right border-l pl-4 border-gray-100">
-                    <p class="text-[10px] text-gray-400 font-bold uppercase">มูลค่าปัจจุบัน</p>
-                    <p id="profitValue" class="text-xl font-black text-slate-800">฿0</p>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-4 p-4 bg-slate-50 rounded-3xl mb-6">
-                <div>
-                    <p class="text-[9px] text-gray-400 font-bold uppercase tracking-tighter">เงินต้นทั้งหมด</p>
-                    <p id="totalCost" class="text-sm font-bold text-slate-700">฿0</p>
-                </div>
-                <div class="text-right">
-                    <p class="text-[9px] text-gray-400 font-bold uppercase tracking-tighter">กำไร / ขาดทุน</p>
-                    <p id="totalProfit" class="text-sm font-bold">฿0 (0%)</p>
-                </div>
+        <div class="bg-white p-6 rounded-[2.5rem] shadow-xl mb-6 text-center border border-gray-100">
+            <div class="flex justify-between items-center mb-2">
+                <h3 class="font-bold text-slate-800 uppercase text-xs tracking-wider">เป้าหมายการสะสม</h3>
+                <button onclick="editGoal()" class="text-[10px] bg-amber-50 px-3 py-1.5 rounded-full font-bold text-amber-600 hover:bg-amber-100 transition-all">⚙️ ตั้งเป้าหมาย</button>
             </div>
             
-            <div class="space-y-2">
-                <div class="flex justify-between items-end mb-1">
-                    <span class="text-[10px] font-black text-slate-400 uppercase italic">Saving Goal</span>
-                    <span id="goalPercent" class="text-amber-600 font-black text-sm">0%</span>
+            <div class="relative h-44 mb-2">
+                <canvas id="goalChart"></canvas>
+                <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none" style="padding-top: 30px;">
+                    <span id="goalPercent" class="text-4xl font-black text-slate-800">0%</span>
+                    <p id="goalLabel" class="text-[10px] text-slate-400 font-bold uppercase mt-1">0 / 10 บาททอง</p>
                 </div>
-                <div class="w-full bg-slate-200 h-3 rounded-full overflow-hidden shadow-inner">
-                    <div id="goalBar" class="bg-amber-500 h-full transition-all duration-1000" style="width: 0%"></div>
-                </div>
-                <div class="text-[10px] text-slate-500 font-bold mt-2" id="goalLabel">0 / 10 บาททอง</div>
+            </div>
+            <p id="badgeMsg" class="text-[11px] font-bold text-amber-600 italic">"ก้าวแรกสำคัญที่สุดเสมอ"</p>
+        </div>
+
+        <div class="flex gap-2 mb-6 bg-white p-1.5 rounded-2xl shadow-sm">
+            <button onclick="switchPort('หงษ์อี้')" id="btnH" class="flex-1 py-3.5 rounded-xl font-black transition-all">หงษ์อี้</button>
+            <button onclick="switchPort('เพชร')" id="btnP" class="flex-1 py-3.5 rounded-xl font-black transition-all">เพชร</button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 mb-6 text-center">
+            <div class="bg-white p-5 rounded-[2rem] shadow-sm border-b-4 border-slate-100">
+                <p class="text-[9px] text-gray-400 font-bold uppercase mb-1">เงินต้นรวม</p>
+                <p id="totalCost" class="text-lg font-black text-slate-800">฿0</p>
+            </div>
+            <div class="bg-white p-5 rounded-[2rem] shadow-sm border-b-4 border-slate-100">
+                <p class="text-[9px] text-gray-400 font-bold uppercase mb-1">กำไร/ขาดทุน</p>
+                <p id="totalProfit" class="text-lg font-black">฿0</p>
             </div>
         </div>
 
-        <div class="bg-white p-6 rounded-[2.5rem] shadow-sm mb-6 border border-gray-100">
-            <div class="space-y-3">
-                <input type="number" id="inAmt" placeholder="เงินที่ซื้อ (฿)" class="w-full p-4 bg-gray-50 rounded-2xl outline-none font-bold">
-                <input type="number" id="inRate" placeholder="ราคาซื้อ (฿)" class="w-full p-4 bg-gray-50 rounded-2xl outline-none font-bold">
-                <button onclick="saveToCloud()" id="saveBtn" class="w-full bg-slate-900 text-white py-5 rounded-2xl font-black text-lg shadow-xl active:scale-95 transition-all">บันทึกออมทอง 🚀</button>
+        <div class="bg-slate-900 p-6 rounded-[2.5rem] shadow-2xl mb-8">
+            <div class="grid grid-cols-2 gap-3 mb-4">
+                <div class="relative">
+                    <label class="text-[9px] text-amber-500 font-bold ml-2 uppercase">จำนวนเงิน (฿)</label>
+                    <input type="number" id="inAmt" placeholder="0.00" class="w-full p-3 bg-slate-800 text-white rounded-xl outline-none border-none font-bold">
+                </div>
+                <div class="relative">
+                    <label class="text-[9px] text-amber-500 font-bold ml-2 uppercase">ราคาทอง (฿)</label>
+                    <input type="number" id="inRate" placeholder="0.00" class="w-full p-3 bg-slate-800 text-white rounded-xl outline-none border-none font-bold">
+                </div>
             </div>
+            <button onclick="saveToCloud()" id="saveBtn" class="w-full bg-gradient-to-r from-amber-400 to-yellow-600 text-white py-4 rounded-xl font-black shadow-lg active:scale-95 transition-all">บันทึกรายการออม ✨</button>
         </div>
 
-        <div id="historyLogs" class="space-y-2 max-h-60 overflow-y-auto"></div>
+        <div class="flex items-center gap-2 mb-4 ml-2">
+            <div class="h-1 w-4 bg-amber-500 rounded-full"></div>
+            <h3 class="font-bold text-slate-800 text-xs uppercase tracking-widest">ประวัติการออม</h3>
+        </div>
+        <div id="historyLogs" class="space-y-3"></div>
     </div>
 
     <script>
-        // 
-        const scriptURL = 'https://script.google.com/macros/s/AKfycbxwfd28g9moTu-lKzIoKtFKysRiD2Id4LchPnQj4fQFRR1Dahh3ED8CseyItgKGCH6b/exec'; 
+        // URL ล่าสุดที่คุณส่งมา
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbxwfd28g9moTu-lKzIoKtFKysRiD2Id4LchPnQj4fQFRR1Dahh3ED8CseyItgKGCH6b/exec';
         
         let currentPort = 'หงษ์อี้';
         let marketPrice = 0;
+        let myChart;
 
         async function syncData() {
             try {
                 const res = await fetch(scriptURL);
                 const result = await res.json();
                 
-                marketPrice = result.price;
-                document.getElementById('livePrice').innerText = `฿${marketPrice.toLocaleString()}`;
-                document.getElementById('dot').className = "h-2 w-2 rounded-full bg-green-500 animate-none";
-                document.getElementById('updateTime').innerText = 'ซิงก์ล่าสุด: ' + new Date().toLocaleTimeString();
-                
+                if (result.price) {
+                    marketPrice = result.price;
+                    document.getElementById('livePrice').innerText = `฿${marketPrice.toLocaleString()}`;
+                    document.getElementById('updateTime').innerText = 'Sync: ' + new Date().toLocaleTimeString();
+                    document.getElementById('dot').className = "h-2 w-2 rounded-full bg-green-500 animate-none";
+                }
                 refreshUI(result.data);
             } catch (e) {
-                document.getElementById('updateTime').innerText = 'กรุณาเช็ค Permission ใน Google Script';
+                document.getElementById('updateTime').innerText = 'Error Connecting...';
             }
         }
 
-        function switchPort(name) {
-            currentPort = name;
-            syncData();
-        }
-
-        async function saveToCloud() {
-            const amt = document.getElementById('inAmt').value;
-            const rate = document.getElementById('inRate').value;
-            if(!amt || !rate) return alert("กรุณาใส่ข้อมูลให้ครบ!");
-            
-            document.getElementById('saveBtn').disabled = true;
-            const weight = (parseFloat(amt) / parseFloat(rate)) * 15.24;
-            
-            await fetch(scriptURL, { method: 'POST', body: JSON.stringify({ port: currentPort, amount: amt, rate: rate, weight: weight }) });
-            
-            document.getElementById('inAmt').value = '';
-            document.getElementById('inRate').value = '';
-            document.getElementById('saveBtn').disabled = false;
-            syncData();
+        function editGoal() {
+            const currentGoal = localStorage.getItem('goal_' + currentPort) || 10;
+            const newGoal = prompt("ตั้งเป้าหมายการออม (หน่วย: บาททอง):", currentGoal);
+            if (newGoal && !isNaN(newGoal)) {
+                localStorage.setItem('goal_' + currentPort, newGoal);
+                syncData();
+            }
         }
 
         function refreshUI(data) {
-            document.getElementById('activeName').innerText = currentPort;
             let totalW = 0, totalCost = 0, html = '';
-
-            for(let i=data.length-1; i>=1; i--) {
-                if(data[i][1] === currentPort) {
-                    const w = parseFloat(data[i][4]);
-                    const cost = parseFloat(data[i][2]);
+            
+            // ข้ามแถวหัวตาราง (index 0)
+            data.slice(1).forEach(row => {
+                if(row[1] === currentPort) {
+                    const w = parseFloat(row[4]);
+                    const cost = parseFloat(row[2]);
                     totalW += w;
                     totalCost += cost;
-                    html += `
-                        <div class="p-3 bg-white rounded-xl shadow-sm text-xs flex justify-between border-l-4 border-amber-400 mb-2">
-                            <span><b>${w.toFixed(3)} กรัม</b><br><span class="text-gray-400 text-[10px]">${new Date(data[i][0]).toLocaleDateString('th-TH')}</span></span>
-                            <span class="text-right font-bold text-slate-700">฿${cost.toLocaleString()}</span>
-                        </div>`;
+                    html = `
+                    <div class="bg-white p-4 rounded-2xl shadow-sm flex justify-between items-center border-l-4 border-amber-400 animate-fade-in">
+                        <div>
+                            <p class="font-black text-slate-800 text-sm">${w.toFixed(3)} กรัม</p>
+                            <p class="text-[9px] text-slate-400 font-bold uppercase">${new Date(row[0]).toLocaleDateString('th-TH')}</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold text-slate-700 text-xs text-amber-600">฿${cost.toLocaleString()}</p>
+                            <p class="text-[8px] text-slate-300">Rate: ${parseFloat(row[3]).toLocaleString()}</p>
+                        </div>
+                    </div>` + html;
                 }
-            }
-
-            document.getElementById('totalWeight').innerText = totalW.toFixed(3) + ' กรัม';
-            document.getElementById('totalCost').innerText = `฿${totalCost.toLocaleString()}`;
-            document.getElementById('historyLogs').innerHTML = html;
+            });
 
             const curBaht = totalW / 15.24;
             const currentVal = Math.round(curBaht * marketPrice);
-            document.getElementById('profitValue').innerText = `฿${currentVal.toLocaleString()}`;
-
             const profit = currentVal - totalCost;
-            const percent = totalCost > 0 ? (profit / totalCost) * 100 : 0;
+            const target = parseFloat(localStorage.getItem('goal_' + currentPort)) || 10;
+            const progress = (curBaht / target) * 100;
+
+            // Update Stats
+            document.getElementById('totalCost').innerText = `฿${totalCost.toLocaleString()}`;
             const profitEl = document.getElementById('totalProfit');
-            
-            if(profit >= 0) {
-                profitEl.className = "text-sm font-bold text-green-600";
-                profitEl.innerText = `+฿${profit.toLocaleString()} (+${percent.toFixed(2)}%)`;
-            } else {
-                profitEl.className = "text-sm font-bold text-red-500";
-                profitEl.innerText = `-฿${Math.abs(profit).toLocaleString()} (${percent.toFixed(2)}%)`;
-            }
+            const percent = totalCost > 0 ? ((profit/totalCost)*100).toFixed(1) : 0;
+            profitEl.innerText = `฿${profit.toLocaleString()} (${percent}%)`;
+            profitEl.className = profit >= 0 ? "text-lg font-black text-green-500" : "text-lg font-black text-red-500";
 
-            const goal = 10;
-            const progress = (curBaht / goal) * 100;
-            document.getElementById('goalBar').style.width = Math.min(progress, 100) + '%';
+            // Update Progress UI
             document.getElementById('goalPercent').innerText = progress.toFixed(1) + '%';
-            document.getElementById('goalLabel').innerText = `${curBaht.toFixed(2)} / ${goal} บาททอง`;
-
-            document.getElementById('btnH').className = currentPort === 'หงษ์อี้' ? 'flex-1 py-3 rounded-xl font-bold bg-amber-500 text-white shadow-md' : 'flex-1 py-3 rounded-xl font-bold text-gray-400 bg-gray-50';
-            document.getElementById('btnP').className = currentPort === 'เพชร' ? 'flex-1 py-3 rounded-xl font-bold bg-amber-500 text-white shadow-md' : 'flex-1 py-3 rounded-xl font-bold text-gray-400 bg-gray-50';
+            document.getElementById('goalLabel').innerText = `${curBaht.toFixed(2)} / ${target} บาททอง`;
+            document.getElementById('historyLogs').innerHTML = html || '<p class="text-center text-slate-300 text-xs italic py-10">ยังไม่มีข้อมูลรายการออม</p>';
+            
+            updateChart(progress);
+            updateBadge(progress);
+            updateButtonStyles();
         }
 
+        function updateChart(percent) {
+            const ctx = document.getElementById('goalChart').getContext('2d');
+            if(myChart) myChart.destroy();
+            myChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [percent, 100 - percent],
+                        backgroundColor: ['#f59e0b', '#f1f5f9'],
+                        borderWidth: 0,
+                        circumference: 180,
+                        rotation: 270
+                    }]
+                },
+                options: { 
+                    cutout: '85%',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { tooltip: { enabled: false } } 
+                }
+            });
+        }
+
+        function updateBadge(p) {
+            const msg = p >= 100 ? "🏆 ถึงเป้าหมายแล้ว! สุดยอดเลย" : p >= 50 ? "⭐️ มาครึ่งทางแล้วนะ สู้ต่อ!" : "🌱 กำลังเติบโตไปทีละนิด...";
+            document.getElementById('badgeMsg').innerText = `"${msg}"`;
+        }
+
+        function updateButtonStyles() {
+            const active = "flex-1 py-3.5 rounded-xl font-black bg-amber-500 text-white shadow-lg scale-105 transition-all";
+            const inactive = "flex-1 py-3.5 rounded-xl font-black bg-white text-slate-400 transition-all";
+            document.getElementById('btnH').className = currentPort === 'หงษ์อี้' ? active : inactive;
+            document.getElementById('btnP').className = currentPort === 'เพชร' ? active : inactive;
+        }
+
+        function switchPort(n) { currentPort = n; syncData(); }
+        
+        async function saveToCloud() {
+            const amt = document.getElementById('inAmt').value;
+            const rate = document.getElementById('inRate').value;
+            if(!amt || !rate) return alert("กรุณากรอกข้อมูลให้ครบนะคะ");
+            
+            const btn = document.getElementById('saveBtn');
+            btn.disabled = true;
+            btn.innerText = "กำลังบันทึก...";
+            
+            const weight = (parseFloat(amt) / parseFloat(rate)) * 15.24;
+            
+            try {
+                await fetch(scriptURL, { 
+                    method: 'POST', 
+                    body: JSON.stringify({ port: currentPort, amount: amt, rate: rate, weight: weight }) 
+                });
+                document.getElementById('inAmt').value = '';
+                document.getElementById('inRate').value = '';
+                await syncData();
+            } catch (e) { alert("บันทึกไม่สำเร็จ ลองใหม่อีกครั้งนะคะ"); }
+            
+            btn.disabled = false;
+            btn.innerText = "บันทึกรายการออม ✨";
+        }
+
+        // เริ่มทำงาน
         syncData();
+        // อัปเดตราคาทุก 1 นาที
         setInterval(syncData, 60000);
     </script>
 </body>
