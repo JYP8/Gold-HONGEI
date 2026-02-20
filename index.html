@@ -41,14 +41,22 @@
             <button onclick="switchPort('เพชร')" id="btnP" class="flex-1 py-3.5 rounded-xl font-black transition-all">เพชร</button>
         </div>
 
-        <div class="grid grid-cols-2 gap-4 mb-6 text-center">
-            <div class="bg-white p-5 rounded-[2rem] shadow-sm border-b-4 border-slate-100">
-                <p class="text-[9px] text-gray-400 font-bold uppercase mb-1">เงินต้นรวม</p>
-                <p id="totalCost" class="text-lg font-black text-slate-800">฿0</p>
+        <div class="grid grid-cols-1 gap-3 mb-6">
+            <div class="bg-white p-5 rounded-[2rem] shadow-sm border-b-4 border-amber-400 text-center">
+                <p class="text-[10px] text-amber-600 font-bold uppercase mb-1 tracking-widest">มูลค่าทองสะสมตอนนี้</p>
+                <p id="currentValue" class="text-3xl font-black text-slate-800">฿0</p>
+                <p class="text-[10px] text-slate-400">คำนวณจากราคาทองวันนี้</p>
             </div>
-            <div class="bg-white p-5 rounded-[2rem] shadow-sm border-b-4 border-slate-100">
-                <p class="text-[9px] text-gray-400 font-bold uppercase mb-1">กำไร/ขาดทุน</p>
-                <p id="totalProfit" class="text-lg font-black">฿0</p>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-white p-5 rounded-[2rem] shadow-sm border-b-4 border-slate-100 text-center">
+                    <p class="text-[9px] text-gray-400 font-bold uppercase mb-1">เงินต้นที่จ่ายไป</p>
+                    <p id="totalCost" class="text-lg font-black text-slate-700">฿0</p>
+                </div>
+                <div class="bg-white p-5 rounded-[2rem] shadow-sm border-b-4 border-slate-100 text-center">
+                    <p class="text-[9px] text-gray-400 font-bold uppercase mb-1">ผลต่างกำไร</p>
+                    <p id="totalProfit" class="text-lg font-black">฿0</p>
+                </div>
             </div>
         </div>
 
@@ -74,7 +82,6 @@
     </div>
 
     <script>
-        // URL ล่าสุดที่คุณส่งมา
         const scriptURL = 'https://script.google.com/macros/s/AKfycbxwfd28g9moTu-lKzIoKtFKysRiD2Id4LchPnQj4fQFRR1Dahh3ED8CseyItgKGCH6b/exec';
         
         let currentPort = 'หงษ์อี้';
@@ -110,7 +117,6 @@
         function refreshUI(data) {
             let totalW = 0, totalCost = 0, html = '';
             
-            // ข้ามแถวหัวตาราง (index 0)
             data.slice(1).forEach(row => {
                 if(row[1] === currentPort) {
                     const w = parseFloat(row[4]);
@@ -132,13 +138,18 @@
             });
 
             const curBaht = totalW / 15.24;
-            const currentVal = Math.round(curBaht * marketPrice);
-            const profit = currentVal - totalCost;
+            const currentVal = Math.round(curBaht * marketPrice); // มูลค่าทองปัจจุบัน
+            const profit = currentVal - totalCost; // กำไร/ขาดทุน
             const target = parseFloat(localStorage.getItem('goal_' + currentPort)) || 10;
             const progress = (curBaht / target) * 100;
 
-            // Update Stats
+            // 1. อัปเดตมูลค่าทองปัจจุบัน (New!)
+            document.getElementById('currentValue').innerText = `฿${currentVal.toLocaleString()}`;
+
+            // 2. อัปเดตต้นทุนรวม
             document.getElementById('totalCost').innerText = `฿${totalCost.toLocaleString()}`;
+
+            // 3. อัปเดตกำไร/ขาดทุน
             const profitEl = document.getElementById('totalProfit');
             const percent = totalCost > 0 ? ((profit/totalCost)*100).toFixed(1) : 0;
             profitEl.innerText = `฿${profit.toLocaleString()} (${percent}%)`;
@@ -199,7 +210,6 @@
             const btn = document.getElementById('saveBtn');
             btn.disabled = true;
             btn.innerText = "กำลังบันทึก...";
-            
             const weight = (parseFloat(amt) / parseFloat(rate)) * 15.24;
             
             try {
@@ -216,9 +226,7 @@
             btn.innerText = "บันทึกรายการออม ✨";
         }
 
-        // เริ่มทำงาน
         syncData();
-        // อัปเดตราคาทุก 1 นาที
         setInterval(syncData, 60000);
     </script>
 </body>
